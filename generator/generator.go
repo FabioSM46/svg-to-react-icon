@@ -60,4 +60,3 @@ func GenerateIndexFile(outputFolder string) error {
 
 	return os.WriteFile(filepath.Join(outputFolder, "index.ts"), []byte(indexContent), 0644)
 }
-

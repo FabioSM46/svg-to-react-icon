@@ -18,9 +18,9 @@ func ReadSVGFiles(folder string) (map[string]string, error) {
 		if err != nil {
 			return err
 		}
-	baseName := strings.TrimSuffix(info.Name(), ".svg")
-	normalizedBaseName := utils.NormalizeName(baseName)
-	files[normalizedBaseName] = string(content)
+		baseName := strings.TrimSuffix(info.Name(), ".svg")
+		normalizedBaseName := utils.NormalizeName(baseName)
+		files[normalizedBaseName] = string(content)
 
 		return nil
 	})
