@@ -1,35 +1,37 @@
 package utils
 
 import (
-	"regexp"
 	"strings"
-
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
+	"unicode"
 )
 
-// Normalizes names to PascalCase and handles leading numbers
 func NormalizeName(name string) string {
-	re := regexp.MustCompile(`^(\d+)([A-Za-z])`)
-	name = re.ReplaceAllString(name, "_${1}${2}")
-	return ToPascalCase(name)
-}
-
-// Converts a name to PascalCase
-func ToPascalCase(name string) string {
-	titleCaser := cases.Title(language.Und)
-	words := strings.FieldsFunc(name, func(r rune) bool {
-		return r == '-' || r == '_' || r == ' '
-	})
-
-	for i, word := range words {
-		words[i] = titleCaser.String(word)
+	var result []rune
+	var capitalizeNext bool
+	for i, r := range name {
+	if r == '-' { 
+		continue
+	}
+			if i == 0 && unicode.IsDigit(r) {
+					result = append(result, '_', r)
+					capitalizeNext = false 
+			} else if i == 0 { 
+		result = append(result, unicode.ToUpper(r)) 
+	} else if r == '_' {
+					capitalizeNext = true
+			} else if capitalizeNext {
+					result = append(result, unicode.ToUpper(r))
+					capitalizeNext = false
+			} else if i > 0 && unicode.IsDigit(r) && name[i-1] == '_' {
+				result = append(result, unicode.ToUpper(r))
+			} else {
+					result = append(result, unicode.ToLower(r))
+			}
 	}
 
-	return strings.Join(words, "")
+	return string(result)
 }
 
-// Modifies SVG attributes
 func TransformSVG(svgContent, id string) string {
 	dashToCamel := map[string]string{
 		"fill-opacity":       "fillOpacity",
@@ -42,11 +44,9 @@ func TransformSVG(svgContent, id string) string {
 		"text-anchor":        "textAnchor",
 		"dominant-baseline":  "dominantBaseline",
 	}
-
 	for dash, camel := range dashToCamel {
 		svgContent = strings.ReplaceAll(svgContent, dash+"=", camel+"=")
 	}
-
 	svgContent = strings.Replace(svgContent, "<svg", `<svg width={size} height={size} id="`+id+`" className={className} onClick={onClick}`, 1)
 	svgContent = strings.Replace(svgContent, `fill="`, `fill={color}"`, -1)
 	svgContent = strings.Replace(svgContent, `stroke="`, `stroke={color}"`, -1)

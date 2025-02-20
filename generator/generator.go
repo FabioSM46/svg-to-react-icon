@@ -9,11 +9,8 @@ import (
 	"github.com/FabioSM46/svg-to-react-icon/utils"
 )
 
-// generateTSX creates the TSX component based on the SVG files
 func GenerateTSX(name, filledSVG, strokeSVG string, hasStroke bool) string {
-	componentName := utils.ToPascalCase(name)
-
-	// Modify SVG attributes
+	componentName := utils.NormalizeName(name)
 	filledSVG = utils.TransformSVG(filledSVG, "filled")
 	strokeSVG = utils.TransformSVG(strokeSVG, "stroke")
 
@@ -34,31 +31,33 @@ const %s: FC<SvgProps> = ({
 export default %s;
 `
 	if hasStroke {
-		return fmt.Sprintf(tsxTemplate, componentName, fmt.Sprintf(`
+		return fmt.Sprintf(tsxTemplate, name, fmt.Sprintf(`
     if (filled)
         return (%s);
     return (%s);
-`, filledSVG, strokeSVG), componentName)
+`, filledSVG, strokeSVG), name)
 	}
 
 	return fmt.Sprintf(tsxTemplate, componentName, fmt.Sprintf("return (%s);", filledSVG), componentName)
 }
 
-// generateIndexFile creates the `index.ts` file with all exports
 func GenerateIndexFile(outputFolder string) error {
 	files, err := os.ReadDir(outputFolder)
 	if err != nil {
 		return err
 	}
-
 	var imports []string
+	var exports []string
 	for _, file := range files {
 		if strings.HasSuffix(file.Name(), ".tsx") && file.Name() != "index.ts" {
 			name := strings.TrimSuffix(file.Name(), ".tsx")
 			imports = append(imports, fmt.Sprintf("import %s from './%s';", name, name))
+			exports = append(exports, name)
 		}
 	}
+	exportStatement := fmt.Sprintf("export { %s };", strings.Join(exports, ", "))
+	indexContent := strings.Join(imports, "\n") + "\n\n" + exportStatement
 
-	indexContent := strings.Join(imports, "\n") + "\n\nexport { " + strings.Join(imports, ", ") + " };"
 	return os.WriteFile(filepath.Join(outputFolder, "index.ts"), []byte(indexContent), 0644)
 }
+
