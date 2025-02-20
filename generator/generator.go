@@ -1,19 +1,21 @@
-package main
+package generator
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/FabioSM46/svg-to-react-icon/utils"
 )
 
 // generateTSX creates the TSX component based on the SVG files
-func generateTSX(name, filledSVG, strokeSVG string, hasStroke bool) string {
-	componentName := toPascalCase(name)
+func GenerateTSX(name, filledSVG, strokeSVG string, hasStroke bool) string {
+	componentName := utils.ToPascalCase(name)
 
 	// Modify SVG attributes
-	filledSVG = transformSVG(filledSVG, "filled")
-	strokeSVG = transformSVG(strokeSVG, "stroke")
+	filledSVG = utils.TransformSVG(filledSVG, "filled")
+	strokeSVG = utils.TransformSVG(strokeSVG, "stroke")
 
 	tsxTemplate := `import { SvgProps } from '@/helpers/interfaces';
 import { FC } from 'react';
@@ -43,7 +45,7 @@ export default %s;
 }
 
 // generateIndexFile creates the `index.ts` file with all exports
-func generateIndexFile(outputFolder string) error {
+func GenerateIndexFile(outputFolder string) error {
 	files, err := os.ReadDir(outputFolder)
 	if err != nil {
 		return err

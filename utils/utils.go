@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"regexp"
@@ -9,14 +9,14 @@ import (
 )
 
 // Normalizes names to PascalCase and handles leading numbers
-func normalizeName(name string) string {
+func NormalizeName(name string) string {
 	re := regexp.MustCompile(`^(\d+)([A-Za-z])`)
 	name = re.ReplaceAllString(name, "_${1}${2}")
-	return toPascalCase(name)
+	return ToPascalCase(name)
 }
 
 // Converts a name to PascalCase
-func toPascalCase(name string) string {
+func ToPascalCase(name string) string {
 	titleCaser := cases.Title(language.Und)
 	words := strings.FieldsFunc(name, func(r rune) bool {
 		return r == '-' || r == '_' || r == ' '
@@ -30,7 +30,7 @@ func toPascalCase(name string) string {
 }
 
 // Modifies SVG attributes
-func transformSVG(svgContent, id string) string {
+func TransformSVG(svgContent, id string) string {
 	dashToCamel := map[string]string{
 		"fill-opacity":       "fillOpacity",
 		"stroke-width":       "strokeWidth",

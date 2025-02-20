@@ -5,14 +5,17 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/FabioSM46/svg-to-react-icon/generator"
+	"github.com/FabioSM46/svg-to-react-icon/parser"
 )
 
-const outputFolder = "./output"
+const outputFolder = "./icons"
 
 func main() {
 	// Ensure two arguments (input folders) are provided
 	if len(os.Args) < 3 {
-		log.Fatal("Usage: go run main.go <firstFolder> <secondFolder>")
+		log.Fatal("Usage: go run main.go <filledFolder> <strokeFolder>")
 	}
 
 	firstFolder := os.Args[1]
@@ -24,12 +27,12 @@ func main() {
 	}
 
 	// Read SVG files from both input folders
-	svgFiles1, err := readSVGFiles(firstFolder)
+	svgFiles1, err := parser.ReadSVGFiles(firstFolder)
 	if err != nil {
 		log.Fatal("Error reading first folder:", err)
 	}
 
-	svgFiles2, err := readSVGFiles(secondFolder)
+	svgFiles2, err := parser.ReadSVGFiles(secondFolder)
 	if err != nil {
 		log.Fatal("Error reading second folder:", err)
 	}
@@ -37,7 +40,7 @@ func main() {
 	// Match SVGs by filename and generate TSX components
 	for name, filledSVG := range svgFiles1 {
 		strokeSVG, exists := svgFiles2[name]
-		tsxContent := generateTSX(name, filledSVG, strokeSVG, exists)
+		tsxContent := generator.GenerateTSX(name, filledSVG, strokeSVG, exists)
 
 		// Write TSX file
 		outputFilePath := filepath.Join(outputFolder, name+".tsx")
@@ -48,7 +51,7 @@ func main() {
 	}
 
 	// Generate index.ts file
-	if err := generateIndexFile(outputFolder); err != nil {
+	if err := generator.GenerateIndexFile(outputFolder); err != nil {
 		log.Fatal("Error generating index.ts:", err)
 	}
 

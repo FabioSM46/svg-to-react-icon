@@ -1,13 +1,15 @@
-package main
+package parser
 
 import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/FabioSM46/svg-to-react-icon/utils"
 )
 
 // readSVGFiles scans a folder and loads all SVG files into a map
-func readSVGFiles(folder string) (map[string]string, error) {
+func ReadSVGFiles(folder string) (map[string]string, error) {
 	files := make(map[string]string)
 
 	err := filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
@@ -23,7 +25,7 @@ func readSVGFiles(folder string) (map[string]string, error) {
 
 		// Normalize filename for matching
 		baseName := strings.TrimSuffix(info.Name(), ".svg")
-		files[normalizeName(baseName)] = string(content)
+		files[utils.NormalizeName(baseName)] = string(content)
 
 		return nil
 	})
