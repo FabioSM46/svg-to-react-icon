@@ -7,12 +7,11 @@ import (
 )
 
 func NormalizeName(name string) string {
+	re := regexp.MustCompile(`[^a-zA-Z0-9_]+`)
+	name = re.ReplaceAllString(name, "")
 	var result []rune
 	var capitalizeNext bool
 	for i, r := range name {
-		if r == '-' {
-			continue
-		}
 		if i == 0 && unicode.IsDigit(r) {
 			result = append(result, '_', r)
 			capitalizeNext = false

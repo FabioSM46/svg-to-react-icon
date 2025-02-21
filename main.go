@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/FabioSM46/svg-to-react-icon/generator"
 	"github.com/FabioSM46/svg-to-react-icon/parser"
@@ -49,33 +48,24 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error getting root directory: %v", err)
 	}
-	prettierConfigPath := filepath.Join(rootDir, ".prettierrc")
+	prettierConfigPath := filepath.Join(rootDir, ".prettierrc.json")
 	if _, err := os.Stat(prettierConfigPath); os.IsNotExist(err) {
 		prettierConfigPath = filepath.Join(rootDir, ".prettierrc")
 	}
 	if _, err := os.Stat(prettierConfigPath); !os.IsNotExist(err) {
-		err = filepath.Walk(outputFolder, func(path string, info os.FileInfo, err error) error {
-			if err != nil || info.IsDir() || !strings.HasSuffix(info.Name(), ".tsx") && !strings.HasSuffix(info.Name(), ".ts") {
-				return nil
-			}
-			prettierArgs := []string{"--write", path}
-			if _, err := os.Stat(prettierConfigPath); !os.IsNotExist(err) {
-				prettierArgs = append(prettierArgs, "--config", prettierConfigPath)
-			}
-			cmd := exec.Command("prettier", prettierArgs...)
+		prettierArgs := []string{"--write", outputFolder}
+		if _, err := os.Stat(prettierConfigPath); !os.IsNotExist(err) {
+			prettierArgs = append(prettierArgs, "--config", prettierConfigPath)
+		}
+		cmd := exec.Command("prettier", prettierArgs...)
+		cmd.Dir = rootDir
 
-			output, err := cmd.CombinedOutput()
-			if err != nil {
-				fmt.Printf("Prettier error for %s: %v\nOutput:%s\n", path, err, output)
-				log.Printf("Error running prettier for %s: %v", path, err)
-			} else {
-				fmt.Printf("Prettier output for %s: %s\n", path, output)
-			}
-
-			return nil
-		})
+		output, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Fatalf("Error running prettier: %v", err)
+			fmt.Printf("Prettier error: %v\nOutput:%s\n", err, output)
+			log.Printf("Error running prettier: %v", err)
+		} else {
+			fmt.Printf("Prettier output: %s\n", output)
 		}
 	} else {
 		fmt.Println(".prettierrc not found in root directory. Skipping formatting.")
